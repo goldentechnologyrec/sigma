@@ -1,42 +1,65 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: product-catalogue-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/product-catalogue
 ---
 apiVersion: v1
-kind: Service
+kind: PersistentVolumeClaim
 metadata:
-  name: productcatalogue
-  labels:
-    app: productcatalogue
+  name: product-catalogue-pvc
 spec:
-  type: NodePort
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
   selector:
-    app: productcatalogue
-  ports:
-  - protocol: TCP
-    port: 8020
-    name: http
-
+    matchLabels:
+      app: product-catalogue
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: productcatalogue
+  name: product-catalogue
 spec:
+  replicas: 1
   selector:
     matchLabels:
-      app: productcatalogue
-  replicas: 1
+      app: product-catalogue
   template:
     metadata:
       labels:
-        app: productcatalogue
+        app: product-catalogue
     spec:
       containers:
-      - name: productcatalogue
-        image: goldenrec/productcatalogue:latest
-        ports:
-        - containerPort: 8020
-        livenessProbe:
-          httpGet:
-            path: /healthcheck
-            port: 8025
-          initialDelaySeconds: 30
-          timeoutSeconds: 1
+      - name: product-catalogue
+        image: product-catalogue:latest
+        volumeMounts:
+        - name: product-catalogue-volume
+          mountPath: /data/product-catalogue
+      volumes:
+      - name: product-catalogue-volume
+        persistentVolumeClaim:
+          claimName: product-catalogue-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: productcatalogue-service
+spec:
+  selector:
+    app: productcatalogue  
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: NodePort
+
+
