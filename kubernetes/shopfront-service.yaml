@@ -40,3 +40,20 @@ spec:
             port: 8010
           initialDelaySeconds: 30
           timeoutSeconds: 1
+        volumeMounts:  
+        - name: shopfront-volume  # Nom du volume
+          mountPath: /data/shopfront  # Emplacement dans le conteneur
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shopfront-pvc  # Nom de la demande de volume persistant
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi  # Taille du volume demandé
+
+
