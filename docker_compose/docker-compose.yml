@@ -1,0 +1,9 @@
+version: '3'
+services:
+      
+        shopfront:
+               build: ../shopfront/
+               container_name: ${SHOPFRONT_CONTAINER_NAME}
+               ports:
+                       - ${SHOPFRONT_PORT}
+               restart: unless-stopped
